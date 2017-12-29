@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/exec"
+	"regexp"
 	"testing"
 )
 
@@ -48,7 +49,7 @@ func Call(ctx context.Context, t testing.TB, f func(), args ...string) (stdoutSt
 		os.Exit(0)
 	}
 
-	args = append([]string{"-test.run=" + t.Name()}, args...)
+	args = append([]string{"-test.run=^" + regexp.QuoteMeta(t.Name()) + "$"}, args...)
 	cmd := exec.CommandContext(ctx, os.Args[0], args...)
 	cmd.Env = append(os.Environ(), "GO_WANT_HELPER_PROCESS=1")
 	out, err := cmd.CombinedOutput()
