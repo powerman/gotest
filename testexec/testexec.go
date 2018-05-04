@@ -5,10 +5,12 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"sync"
 	"testing"
 )
 
 var calledFrom = map[testing.TB]bool{}
+var calledFromMu sync.Mutex
 
 // Func let you test functions which may call os.Exit() or hang (for ex.
 // main()) by running them in separate process. Result of executing f
@@ -37,6 +39,8 @@ var calledFrom = map[testing.TB]bool{}
 // code before Func, but also code in surrounding function after t.Run()
 // containing this Func.
 func Func(ctx context.Context, t testing.TB, f func(), args ...string) *exec.Cmd {
+	calledFromMu.Lock()
+	defer calledFromMu.Unlock()
 	if calledFrom[t] {
 		panic("Func can be used only once per test")
 	}
