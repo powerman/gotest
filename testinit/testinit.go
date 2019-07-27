@@ -49,14 +49,17 @@ func Setup(idx int, f func()) {
 var teardownFunc []func()
 
 func teardown() {
-	for _, f := range teardownFunc {
-		f()
+	for i := len(teardownFunc) - 1; i >= 0; i-- {
+		teardownFunc[i]()
 	}
 }
 
 // Teardown ensure f will be called before exiting from test.
 // You should always call Main from TestMain and call Fatal instead
 // of log.Fatal or os.Exit.
+//
+// If Teardown will be called multiple times then f will be executed in
+// reverse order - just like defer does.
 func Teardown(f func()) {
 	teardownFunc = append(teardownFunc, f)
 }
