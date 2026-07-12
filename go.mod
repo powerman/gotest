@@ -1,8 +1,5 @@
 module github.com/powerman/gotest
 
-go 1.16
+go 1.25.0
 
-require (
-	github.com/powerman/check v1.4.0
-	github.com/smartystreets/goconvey v1.6.4
-)
+require github.com/powerman/check v1.13.0

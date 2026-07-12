@@ -1,17 +1,18 @@
+// Package testinit provides helpers to manage test setup and teardown lifecycle
+// in [testing.TestMain].
 package testinit
 
 import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"testing"
 
 	"github.com/powerman/check"
-	_ "github.com/smartystreets/goconvey/convey" // add goconvey support to all tests
 )
 
-// Main should be called from TestMain to ensure Setup and Teardown
-// functions will be called.
+// Main should be called from TestMain to ensure Setup and Teardown functions will be called.
 //
 //	func TestMain(m *testing.M) { testinit.Main(m) }
 func Main(m *testing.M) {
@@ -19,10 +20,10 @@ func Main(m *testing.M) {
 	code := m.Run()
 	check.Report()
 	teardown()
-	os.Exit(code)
+	os.Exit(code) //revive:disable-line:deep-exit // TestMain.
 }
 
-var setupFunc [8]func()
+var setupFunc [8]func() //nolint:gochecknoglobals // Test helper requires global state.
 
 func setup() {
 	for _, f := range setupFunc {
@@ -37,7 +38,7 @@ func setup() {
 //	func init() { testinit.Setup(1, setup) }
 //	func setup() { ... }
 func Setup(idx int, f func()) {
-	if !(0 <= idx && idx < len(setupFunc)) {
+	if 0 > idx || idx >= len(setupFunc) {
 		panic(fmt.Sprintf("Setup(%d) is invalid, valid values are 0…%d", idx, len(setupFunc)))
 	}
 	if setupFunc[idx] != nil {
@@ -46,27 +47,26 @@ func Setup(idx int, f func()) {
 	setupFunc[idx] = f
 }
 
-var teardownFunc []func()
+var teardownFunc []func() //nolint:gochecknoglobals // Test helper requires global state.
 
 func teardown() {
-	for i := len(teardownFunc) - 1; i >= 0; i-- {
-		teardownFunc[i]()
+	for _, v := range slices.Backward(teardownFunc) {
+		v()
 	}
 }
 
 // Teardown ensure f will be called before exiting from test.
-// You should always call Main from TestMain and call Fatal instead
-// of log.Fatal or os.Exit.
+// You should always call Main from TestMain and call [Fatal]
+// instead of [log.Fatal] or [os.Exit].
 //
-// If Teardown will be called multiple times then f will be executed in
-// reverse order - just like defer does.
+// If Teardown will be called multiple times then f will be executed in reverse order -
+// just like defer does.
 func Teardown(f func()) {
 	teardownFunc = append(teardownFunc, f)
 }
 
-// Fatal works like log.Fatal but it ensure teardown functions will be
-// called before exit.
-func Fatal(v ...interface{}) {
+// Fatal works like [log.Fatal] but it ensure teardown functions will be called before exit.
+func Fatal(v ...any) {
 	teardown()
-	log.Fatal(v...)
+	log.Fatal(v...) //revive:disable-line:deep-exit // Fatal wrapper.
 }
