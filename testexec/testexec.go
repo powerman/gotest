@@ -3,7 +3,6 @@
 package testexec
 
 import (
-	"context"
 	"os"
 	"os/exec"
 	"regexp"
@@ -26,7 +25,7 @@ var (
 //	package main
 //	func TestFlagHelp(tt *testing.T) {
 //		t := check.Must(tt)
-//		out, err := testexec.Func(ctx, t, main, "-h").CombinedOutput()
+//		out, err := testexec.Func(t, main, "-h").CombinedOutput()
 //		t.Match(err, "exit status 2")
 //		t.Match(out, "-version")
 //	}
@@ -40,7 +39,7 @@ var (
 // but beware subtests with t.Parallel() - they'll run after surrounding test function returns,
 // so in this case both processes will share not only code before Func,
 // but also code in surrounding function after t.Run() containing this Func.
-func Func(ctx context.Context, tb testing.TB, f func(), args ...string) *exec.Cmd {
+func Func(tb testing.TB, f func(), args ...string) *exec.Cmd {
 	tb.Helper()
 
 	if os.Getenv("GO_WANT_HELPER_PROCESS") == "1" {
@@ -56,7 +55,7 @@ func Func(ctx context.Context, tb testing.TB, f func(), args ...string) *exec.Cm
 	calledFrom[tb] = true
 
 	args = append([]string{"-test.run=^" + regexp.QuoteMeta(tb.Name()) + "$"}, args...)
-	cmd := exec.CommandContext(ctx, os.Args[0], args...) //nolint:gosec // Re-executing test binary is by design.
+	cmd := exec.CommandContext(tb.Context(), os.Args[0], args...) //nolint:gosec // Re-executing test binary is by design.
 	cmd.Env = append(os.Environ(), "GO_WANT_HELPER_PROCESS=1")
 	return cmd
 }
