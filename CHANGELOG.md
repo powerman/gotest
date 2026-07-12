@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-07-12
+
+### 🐛 Fixed
+
+- **(testexec)** Anchor every -test.run pattern element individually by @powerman in [b4ed3cf]
+
+[0.4.1]: https://github.com/powerman/gotest/compare/v0.4.0..v0.4.1
+[b4ed3cf]: https://github.com/powerman/gotest/commit/b4ed3cfeb0d44e0cb282a5162f5513f5e9b7cb41
+
 ## [0.4.0] - 2026-07-12
 
 ### ➖ Removed
